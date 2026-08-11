@@ -76,20 +76,14 @@ network access; see the README's Testing section for how that works.
 ## Branching model
 
 `main` is the protected, always-releasable branch — it only moves via a
-pull request, never a direct push. `dev` is the integration branch: work
-happens there (or on a feature branch cut from `dev`), then gets PR'd into
-`main` once it's ready.
+reviewed pull request, never a direct push. `dev` is the integration branch:
+work happens there (or on a feature branch cut from `dev`), then gets PR'd
+into `main` once it's ready.
 
-`main` is protected: a PR into it needs a passing CI run (lint, typecheck,
-test, build, dependency audit, secret scan — see
-`.github/workflows/ci.yml`) and a code owner review before it can be
-merged, and direct pushes/force-pushes to it are blocked. GitHub doesn't
-let a PR author formally approve their own PR, so with a single maintainer
-that review requirement can't literally be satisfied on the maintainer's
-own PRs — `enforce_admins` is off specifically so the maintainer can merge
-via GitHub's admin-bypass option once CI is green, while the review
-requirement still applies to anyone else. Either way, merging is a
-deliberate, manual action — nothing merges automatically.
+`main` is protected: a PR into it needs a maintainer (code owner) review and
+a passing CI run (lint, typecheck, test, build, dependency audit, secret
+scan — see `.github/workflows/ci.yml`) before it can be merged, and direct
+pushes/force-pushes to it are blocked, including for the maintainer.
 
 ## Commit messages / PRs
 
