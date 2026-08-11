@@ -36,3 +36,16 @@ export const DEBUG_NETWORK: boolean =
   (import.meta.env.VITE_DEBUG_NETWORK === undefined && import.meta.env.DEV);
 
 export const IS_PROD: boolean = import.meta.env.PROD;
+
+/**
+ * OAuth scope requested at sign-in. `atproto` alone (the SDK's own default)
+ * only grants identity-level access — not enough to read a timeline, post,
+ * like, follow, etc. `transition:generic` is the current AT Protocol scope
+ * for full account access (the successor to the deprecated app-password
+ * model), matching public/client-metadata.json's `scope` field for
+ * production. Both the dev (loopback) and production OAuth client
+ * construction in auth/oauthClient.ts must request this same scope, or
+ * every authenticated XRPC call will fail with a 403
+ * ("Missing required scope").
+ */
+export const OAUTH_SCOPE = "atproto transition:generic";

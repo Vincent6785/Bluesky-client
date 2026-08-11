@@ -7,6 +7,32 @@ project doesn't yet follow Semantic Versioning tags (no release has been cut
 
 ## [Unreleased]
 
+### Fixed (found testing against a real Bluesky account)
+
+- **The dev (loopback) OAuth client requested no explicit scope**, so it
+  fell back to the SDK's bare `atproto` default (identity-only) instead of
+  `transition:generic` (full account access) — which
+  `public/client-metadata.json` already correctly requests for production.
+  Every real XRPC call (timeline, posts, likes, ...) failed with a 403
+  "Missing required scope" right after a successful sign-in. Fixed by
+  building the loopback `client_id` with an explicit `&scope=` matching
+  production (`config/env.ts`'s new `OAUTH_SCOPE`, used by both paths in
+  `auth/oauthClient.ts`). Anyone who signed in before this fix needs to sign
+  out and back in to get a correctly-scoped token.
+- `authStore.initialize()` had no guard against concurrent invocation. In
+  practice this was reachable via React StrictMode's deliberate
+  double-invoke of effects in development: since an OAuth authorization
+  code is single-use, a second concurrent call could fail redeeming an
+  already-consumed code and clobber the first call's successful sign-in.
+  Now concurrent calls share one in-flight attempt; a call after the first
+  has settled still runs for real (so "Try again" keeps working). Covered
+  by tests.
+- Neither `authStore.initialize()`'s catch block nor `useAsync`'s fetch
+  failures logged the raw error anywhere — only the safe, categorized
+  message shown to the user was visible, making failures like the scope
+  issue above hard to diagnose from the browser console. Both now
+  `console.error` the raw error in dev builds only.
+
 ### Fixed (deep audit pass)
 
 - No `<img>`/`<div>` click targets (post cards, notifications, search

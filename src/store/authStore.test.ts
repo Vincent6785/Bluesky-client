@@ -63,6 +63,35 @@ describe("authStore.initialize", () => {
     expect(auth.status).toBe("error");
     expect(hasAgent()).toBe(false); // must not leave a stale/partial agent around
   });
+
+  it("calling initialize() twice concurrently only processes the OAuth callback once", async () => {
+    // Regression test: React StrictMode deliberately double-invokes effects
+    // in development, which double-invoked this. An OAuth authorization
+    // code is single-use — redeeming it twice would fail the second call
+    // and risk clobbering the first call's successful sign-in.
+    const { session } = createFakeSessionManager({});
+    const client = mockClient({ init: vi.fn().mockResolvedValue({ session }) });
+
+    const store = useAuthStore.getState();
+    const [first, second] = [store.initialize(), store.initialize()];
+    await Promise.all([first, second]);
+
+    expect(client.init).toHaveBeenCalledTimes(1);
+    expect(useAuthStore.getState().auth).toEqual({ status: "signed-in", did: FAKE_USER_DID });
+  });
+
+  it("a later call to initialize() (e.g. after the first settles) runs for real, not a cached replay", async () => {
+    mockClient({ init: vi.fn().mockResolvedValue(undefined) });
+    await useAuthStore.getState().initialize();
+    expect(useAuthStore.getState().auth).toEqual({ status: "signed-out" });
+
+    const { session } = createFakeSessionManager({});
+    const client = mockClient({ init: vi.fn().mockResolvedValue({ session }) });
+    await useAuthStore.getState().initialize();
+
+    expect(client.init).toHaveBeenCalledTimes(1);
+    expect(useAuthStore.getState().auth).toEqual({ status: "signed-in", did: FAKE_USER_DID });
+  });
 });
 
 describe("authStore.signIn", () => {
