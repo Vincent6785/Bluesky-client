@@ -94,6 +94,12 @@ Data flow for, say, "like a post": `ui/PostCard` → `services/postService.like(
   README's deployment section. Development uses the AT Protocol's
   "loopback client" (`http://localhost?redirect_uri=...`), which needs no
   hosted document.
+- Both paths request the same scope — `config/env.ts`'s `OAUTH_SCOPE`
+  (`atproto transition:generic`) — explicitly. The SDK's own default for a
+  loopback client with no scope specified is the bare `atproto` scope,
+  which is identity-only and too narrow for this app's actual XRPC calls
+  (timeline, posts, likes, ...); `auth/oauthClient.ts` builds the loopback
+  `client_id` with an explicit `&scope=` for exactly this reason.
 
 ## Network transparency
 
