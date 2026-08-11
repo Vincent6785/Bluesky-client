@@ -1,9 +1,13 @@
 name: CI
 
 on:
+  # Runs on every PR targeting main (the dev -> main promotion PR, or any
+  # other branch someone opens a PR from) and on every push to dev, so
+  # problems surface before a PR into main is even opened.
   pull_request:
-  push:
     branches: [main]
+  push:
+    branches: [main, dev]
 
 # No secrets are used anywhere in this workflow — it only installs public
 # dependencies and runs local checks against the checked-out code.
