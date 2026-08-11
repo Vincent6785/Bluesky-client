@@ -12,6 +12,11 @@ export function useAsync<T>(fn: () => Promise<T>, deps: unknown[]): AsyncState<T
 
   useEffect(() => {
     let cancelled = false;
+    // Resets state back to "loading" when deps/reloadToken change (e.g. a
+    // previous "success"/"error" must not linger while refetching). On the
+    // very first run this duplicates the initial useState value, which is
+    // the harmless "extra render" this rule normally guards against.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setState({ status: "loading" });
     fn()
       .then((data) => {
