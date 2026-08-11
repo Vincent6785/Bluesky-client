@@ -5,23 +5,16 @@
 Please **do not open a public GitHub issue** for a security vulnerability —
 that publishes the details before there's a fix.
 
-**Preferred: GitHub Private Vulnerability Reporting.** Once this repository
-is public, use its "Report a vulnerability" button under the **Security**
+**Preferred: GitHub Private Vulnerability Reporting**, enabled on this
+repository. Use the "Report a vulnerability" button under the **Security**
 tab (or go directly to `Security` → `Advisories` → `Report a vulnerability`
 on the repository page). This opens a private conversation with the
 maintainer that isn't visible to anyone else until a fix is ready.
 
-> This repository is currently private, and GitHub only offers private
-> vulnerability reporting on private repos with GitHub Advanced Security, so
-> the button won't be available until the repo goes public. The maintainer
-> should enable it (repository **Settings → Security → Private vulnerability
-> reporting**) as part of making the repository public — it's free for
-> public repositories and takes one click.
-
-**If that's not available yet:** open a GitHub issue that contains *no
-technical details* — just a note that you've found a possible security
-issue and would like a private channel to report it — and wait for the
-maintainer to follow up.
+**If that button isn't visible for some reason:** open a GitHub issue that
+contains *no technical details* — just a note that you've found a possible
+security issue and would like a private channel to report it — and wait for
+the maintainer to follow up.
 
 ## What counts as a vulnerability here
 

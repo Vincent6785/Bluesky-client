@@ -59,3 +59,17 @@ project doesn't yet follow Semantic Versioning tags (no release has been cut
   `localStorage`; corrected to reflect that the OAuth SDK stores the
   signed-in DID there as a restore pointer (a public identifier, not a
   credential) — tokens and DPoP keys remain IndexedDB-only.
+
+### Changed
+
+- Upgraded `@atproto/api` (0.15→0.20) and `@atproto/xrpc` (0.7→0.8); Node.js
+  22+ is now required (`@atproto/api` 0.20.0 dropped Node 18/20 support).
+- Upgraded ESLint (9→10, with `@eslint/js`/`typescript-eslint`/the two
+  `eslint-plugin-react-*` packages) and Vite (6→8, with
+  `@vitejs/plugin-react`).
+- `api/agentService.ts` now dynamically imports `@atproto/api`'s `Agent`
+  only once a session actually exists, and the five main screens are
+  `React.lazy()`-loaded — a signed-out visitor's initial bundle no longer
+  includes `@atproto/api`'s ~103KB-gzip chunk.
+- The repository is now public, with GitHub Private Vulnerability Reporting
+  and Dependabot security alerts enabled.
