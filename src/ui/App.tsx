@@ -3,6 +3,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useNavigationStore, type View } from "@/store/navigationStore";
 import { LoginScreen } from "@/ui/screens/LoginScreen";
 import { DebugNetworkPanel } from "@/ui/components/DebugNetworkPanel";
+import { ErrorBoundary } from "@/ui/components/ErrorBoundary";
 import "@/ui/styles.css";
 
 // Lazy-loaded: only a signed-in user ever needs any of these, and only one
@@ -24,6 +25,17 @@ const TITLES: Record<View["name"], string> = {
   search: "Search",
 };
 
+function viewKey(view: View): string {
+  switch (view.name) {
+    case "thread":
+      return `thread:${view.uri}`;
+    case "profile":
+      return `profile:${view.actor}`;
+    default:
+      return view.name;
+  }
+}
+
 function ViewRouter({ view }: { view: View }) {
   switch (view.name) {
     case "timeline":
@@ -44,9 +56,13 @@ function AppShell() {
   const signOut = useAuthStore((s) => s.signOut);
   const { current, stack, push, back, reset } = useNavigationStore();
 
+  useEffect(() => {
+    document.title = `${TITLES[current.name]} — Bluesky Client`;
+  }, [current.name]);
+
   return (
     <div className="app-shell">
-      <div className="top-bar">
+      <header className="top-bar">
         {stack.length > 1 && (
           <button type="button" className="icon-button" onClick={back} aria-label="Back">
             ←
@@ -59,8 +75,8 @@ function AppShell() {
         <button type="button" className="icon-button" onClick={() => void signOut()}>
           Sign out
         </button>
-      </div>
-      <nav className="nav-bar">
+      </header>
+      <nav className="nav-bar" aria-label="Main">
         <button type="button" aria-current={current.name === "timeline"} onClick={() => reset({ name: "timeline" })}>
           Home
         </button>
@@ -75,9 +91,13 @@ function AppShell() {
           Notifications
         </button>
       </nav>
-      <Suspense fallback={<p className="centered-message">Loading…</p>}>
-        <ViewRouter view={current} />
-      </Suspense>
+      <main>
+        <ErrorBoundary key={viewKey(current)}>
+          <Suspense fallback={<p className="centered-message">Loading…</p>}>
+            <ViewRouter view={current} />
+          </Suspense>
+        </ErrorBoundary>
+      </main>
     </div>
   );
 }

@@ -33,6 +33,7 @@ export function LoginScreen() {
       <form onSubmit={onSubmit}>
         <input
           type="text"
+          aria-label="Bluesky handle"
           placeholder="handle.bsky.social"
           value={handle}
           onChange={(e) => setHandle(e.target.value)}

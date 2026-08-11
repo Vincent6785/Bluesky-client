@@ -5,6 +5,7 @@ import { PostCard } from "@/ui/components/PostCard";
 import type { ThreadNode } from "@/models/post";
 import { useNavigationStore } from "@/store/navigationStore";
 import { describeError } from "@/errors/describeError";
+import { onLinkActivateKey } from "@/ui/a11y";
 
 function isThreadPost(node: unknown): node is ThreadNode {
   return Boolean(node) && (node as { $type?: string }).$type === "app.bsky.feed.defs#threadViewPost";
@@ -40,7 +41,14 @@ export function ThreadScreen({ uri }: { uri: string }) {
   return (
     <div>
       {ancestors.map((node) => (
-        <div key={node.post.uri} className="thread-parent-link" onClick={() => push({ name: "thread", uri: node.post.uri })}>
+        <div
+          key={node.post.uri}
+          className="thread-parent-link"
+          role="link"
+          tabIndex={0}
+          onClick={() => push({ name: "thread", uri: node.post.uri })}
+          onKeyDown={onLinkActivateKey(() => push({ name: "thread", uri: node.post.uri }))}
+        >
           ↑ In reply to @{node.post.author.handle}
         </div>
       ))}

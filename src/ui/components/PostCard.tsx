@@ -6,6 +6,7 @@ import { like, unlike, repost, unrepost, deletePost } from "@/services/postServi
 import { useAuthStore } from "@/store/authStore";
 import { useNavigationStore } from "@/store/navigationStore";
 import { describeError } from "@/errors/describeError";
+import { onLinkActivateKey } from "@/ui/a11y";
 import { RichTextView } from "./RichTextView";
 
 function formatTimestamp(iso: string): string {
@@ -93,29 +94,33 @@ export function PostCard({ post, onDeleted }: { post: Post; onDeleted?: () => vo
 
   const images = AppBskyEmbedImages.isView(post.embed) ? post.embed.images : undefined;
 
+  function goToProfile(e: { stopPropagation: () => void }) {
+    e.stopPropagation();
+    push({ name: "profile", actor: post.author.did });
+  }
+
   return (
     <article
       className="post-card"
       onClick={() => push({ name: "thread", uri: post.uri })}
+      onKeyDown={onLinkActivateKey(() => push({ name: "thread", uri: post.uri }))}
       role="link"
       tabIndex={0}
     >
-      <img
-        className="avatar"
-        src={post.author.avatar}
-        alt=""
-        onClick={(e) => {
-          e.stopPropagation();
-          push({ name: "profile", actor: post.author.did });
-        }}
-      />
+      {/* Mouse-only shortcut to the same destination as .post-author-line below,
+          which is the keyboard/screen-reader-accessible route there — avoiding
+          a second, redundant focusable stop for the identical link. */}
+      <div className="post-author-avatar-line" onClick={goToProfile}>
+        <img className="avatar" src={post.author.avatar} alt="" />
+      </div>
       <div className="post-body">
         <div
           className="post-author-line"
-          onClick={(e) => {
-            e.stopPropagation();
-            push({ name: "profile", actor: post.author.did });
-          }}
+          role="link"
+          tabIndex={0}
+          aria-label={`${post.author.displayName || post.author.handle}'s profile`}
+          onClick={goToProfile}
+          onKeyDown={onLinkActivateKey(() => push({ name: "profile", actor: post.author.did }))}
         >
           <span className="display-name">{post.author.displayName || post.author.handle}</span>
           <span className="handle">@{post.author.handle}</span>
@@ -130,17 +135,33 @@ export function PostCard({ post, onDeleted }: { post: Post; onDeleted?: () => vo
           </div>
         )}
         <div className="post-actions" onClick={(e) => e.stopPropagation()}>
-          <button type="button" onClick={() => push({ name: "thread", uri: post.uri })}>
+          <button type="button" aria-label="View replies" onClick={() => push({ name: "thread", uri: post.uri })}>
             💬 {post.replyCount ?? 0}
           </button>
-          <button type="button" data-kind="repost" data-active={Boolean(viewer?.repost)} onClick={toggleRepost} disabled={busy}>
+          <button
+            type="button"
+            data-kind="repost"
+            data-active={Boolean(viewer?.repost)}
+            aria-label={viewer?.repost ? "Undo repost" : "Repost"}
+            aria-pressed={Boolean(viewer?.repost)}
+            onClick={toggleRepost}
+            disabled={busy}
+          >
             🔁 {post.repostCount ?? 0}
           </button>
-          <button type="button" data-kind="like" data-active={Boolean(viewer?.like)} onClick={toggleLike} disabled={busy}>
+          <button
+            type="button"
+            data-kind="like"
+            data-active={Boolean(viewer?.like)}
+            aria-label={viewer?.like ? "Unlike" : "Like"}
+            aria-pressed={Boolean(viewer?.like)}
+            onClick={toggleLike}
+            disabled={busy}
+          >
             {viewer?.like ? "❤️" : "🤍"} {post.likeCount ?? 0}
           </button>
           {isOwn && (
-            <button type="button" onClick={onDelete} disabled={busy}>
+            <button type="button" aria-label="Delete post" onClick={onDelete} disabled={busy}>
               🗑️
             </button>
           )}
