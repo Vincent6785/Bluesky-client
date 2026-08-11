@@ -1,0 +1,12 @@
+{
+  "client_id": "https://example.invalid/client-metadata.json",
+  "client_name": "Bluesky Client",
+  "client_uri": "https://example.invalid",
+  "redirect_uris": ["https://example.invalid/"],
+  "scope": "atproto transition:generic",
+  "grant_types": ["authorization_code", "refresh_token"],
+  "response_types": ["code"],
+  "token_endpoint_auth_method": "none",
+  "application_type": "web",
+  "dpop_bound_access_tokens": true
+}
