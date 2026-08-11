@@ -163,7 +163,7 @@ describe("signed-in flow", () => {
     await screen.findByPlaceholderText("What's happening?");
     fireEvent.click(screen.getByRole("button", { name: /^search$/i }));
 
-    const searchInput = screen.getByPlaceholderText("Search Bluesky");
+    const searchInput = await screen.findByPlaceholderText("Search Bluesky");
     fireEvent.change(searchInput, { target: { value: "findme" } });
     fireEvent.click(searchInput.closest(".search-input-row")!.querySelector(".primary-button")!);
 

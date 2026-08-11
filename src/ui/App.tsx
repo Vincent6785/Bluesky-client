@@ -1,14 +1,20 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { useNavigationStore, type View } from "@/store/navigationStore";
 import { LoginScreen } from "@/ui/screens/LoginScreen";
-import { TimelineScreen } from "@/ui/screens/TimelineScreen";
-import { ThreadScreen } from "@/ui/screens/ThreadScreen";
-import { ProfileScreen } from "@/ui/screens/ProfileScreen";
-import { NotificationsScreen } from "@/ui/screens/NotificationsScreen";
-import { SearchScreen } from "@/ui/screens/SearchScreen";
 import { DebugNetworkPanel } from "@/ui/components/DebugNetworkPanel";
 import "@/ui/styles.css";
+
+// Lazy-loaded: only a signed-in user ever needs any of these, and only one
+// is ever visible at a time — no reason to ship all five in the initial,
+// signed-out-visitor bundle alongside LoginScreen.
+const TimelineScreen = lazy(() => import("@/ui/screens/TimelineScreen").then((m) => ({ default: m.TimelineScreen })));
+const ThreadScreen = lazy(() => import("@/ui/screens/ThreadScreen").then((m) => ({ default: m.ThreadScreen })));
+const ProfileScreen = lazy(() => import("@/ui/screens/ProfileScreen").then((m) => ({ default: m.ProfileScreen })));
+const NotificationsScreen = lazy(() =>
+  import("@/ui/screens/NotificationsScreen").then((m) => ({ default: m.NotificationsScreen })),
+);
+const SearchScreen = lazy(() => import("@/ui/screens/SearchScreen").then((m) => ({ default: m.SearchScreen })));
 
 const TITLES: Record<View["name"], string> = {
   timeline: "Home",
@@ -69,7 +75,9 @@ function AppShell() {
           Notifications
         </button>
       </nav>
-      <ViewRouter view={current} />
+      <Suspense fallback={<p className="centered-message">Loading…</p>}>
+        <ViewRouter view={current} />
+      </Suspense>
     </div>
   );
 }

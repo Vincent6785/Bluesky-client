@@ -29,11 +29,11 @@ export const useAuthStore = create<AuthStore>((set) => ({
       const result = await restoreSession();
       if (result.status === "signed-in") {
         activeSession = result.session;
-        setSession(result.session);
+        await setSession(result.session);
         set({ auth: { status: "signed-in", did: result.session.did } });
       } else {
         activeSession = undefined;
-        setSession(undefined);
+        await setSession(undefined);
         set({ auth: { status: "signed-out" } });
       }
     } catch (error) {
@@ -42,7 +42,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       // back to a clean signed-out state, with the reason surfaced so the
       // user isn't left guessing why they weren't signed in.
       activeSession = undefined;
-      setSession(undefined);
+      await setSession(undefined);
       set({ auth: { status: "error", message: describeError(error).message } });
     }
   },
@@ -64,7 +64,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       if (import.meta.env.DEV) console.debug("[auth] session revoke failed:", describeError(error).message);
     } finally {
       activeSession = undefined;
-      setSession(undefined);
+      await setSession(undefined);
       set({ auth: { status: "signed-out" } });
     }
   },

@@ -1,4 +1,4 @@
-import { Agent } from "@atproto/api";
+import type { Agent } from "@atproto/api";
 import type { OAuthSession } from "@atproto/oauth-client-browser";
 
 /**
@@ -10,9 +10,20 @@ import type { OAuthSession } from "@atproto/oauth-client-browser";
  */
 let currentAgent: Agent | undefined;
 
-/** Called by the auth store whenever the session changes (sign-in, sign-out, restore). */
-export function setSession(session: OAuthSession | undefined): void {
-  currentAgent = session ? new Agent(session) : undefined;
+/**
+ * Called by the auth store whenever the session changes (sign-in, sign-out,
+ * restore). `@atproto/api` is dynamically imported here rather than at
+ * module top level, so its (large, generated-Lexicon) bundle is only
+ * fetched once there's an actual session to build an `Agent` from — a
+ * signed-out visitor on the login screen never downloads it.
+ */
+export async function setSession(session: OAuthSession | undefined): Promise<void> {
+  if (!session) {
+    currentAgent = undefined;
+    return;
+  }
+  const { Agent } = await import("@atproto/api");
+  currentAgent = new Agent(session);
 }
 
 export function hasAgent(): boolean {
