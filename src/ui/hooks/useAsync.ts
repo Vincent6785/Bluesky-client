@@ -23,6 +23,7 @@ export function useAsync<T>(fn: () => Promise<T>, deps: unknown[]): AsyncState<T
         if (!cancelled) setState({ status: "success", data });
       })
       .catch((error: unknown) => {
+        if (import.meta.env.DEV) console.error("[useAsync] fetch failed:", error);
         if (!cancelled) setState({ status: "error", error });
       });
     return () => {

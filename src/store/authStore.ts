@@ -21,30 +21,47 @@ type AuthStore = {
 
 let activeSession: OAuthSession | undefined;
 
+// Guards restoreSession()/client.init() against running twice concurrently.
+// This matters more than the usual "avoid duplicate work" reason: an OAuth
+// authorization code is single-use, so if the callback-processing effect
+// fires twice in quick succession (e.g. React StrictMode's deliberate
+// double-invoke of effects in development), the second call would try to
+// redeem an already-consumed code and fail, potentially clobbering the
+// first call's successful sign-in when its state update lands afterwards.
+let initializePromise: Promise<void> | undefined;
+
 export const useAuthStore = create<AuthStore>((set) => ({
   auth: { status: "loading" },
 
-  initialize: async () => {
-    try {
-      const result = await restoreSession();
-      if (result.status === "signed-in") {
-        activeSession = result.session;
-        await setSession(result.session);
-        set({ auth: { status: "signed-in", did: result.session.did } });
-      } else {
+  initialize: () => {
+    initializePromise ??= (async () => {
+      try {
+        const result = await restoreSession();
+        if (result.status === "signed-in") {
+          activeSession = result.session;
+          await setSession(result.session);
+          set({ auth: { status: "signed-in", did: result.session.did } });
+        } else {
+          activeSession = undefined;
+          await setSession(undefined);
+          set({ auth: { status: "signed-out" } });
+        }
+      } catch (error) {
+        // A failed restore/callback (expired code, revoked session, network
+        // error) must never leave the app stuck on the loading screen: fall
+        // back to a clean signed-out state, with the reason surfaced so the
+        // user isn't left guessing why they weren't signed in.
+        if (import.meta.env.DEV) console.error("[auth] initialize() failed:", error);
         activeSession = undefined;
         await setSession(undefined);
-        set({ auth: { status: "signed-out" } });
+        set({ auth: { status: "error", message: describeError(error).message } });
+      } finally {
+        // Allow a later, genuinely new attempt (e.g. the "Try again" button)
+        // to run for real instead of replaying this settled promise.
+        initializePromise = undefined;
       }
-    } catch (error) {
-      // A failed restore/callback (expired code, revoked session, network
-      // error) must never leave the app stuck on the loading screen: fall
-      // back to a clean signed-out state, with the reason surfaced so the
-      // user isn't left guessing why they weren't signed in.
-      activeSession = undefined;
-      await setSession(undefined);
-      set({ auth: { status: "error", message: describeError(error).message } });
-    }
+    })();
+    return initializePromise;
   },
 
   signIn: async (handle: string) => {
