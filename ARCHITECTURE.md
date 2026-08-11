@@ -61,6 +61,11 @@ models/      Thin type aliases over @atproto/api's generated Lexicon types,
 api/         agentService.ts: the one module allowed to hold an Agent
              instance. Everything else gets one via getAgent().
 auth/        OAuth client setup and sign-in/sign-out/session-restore.
+errors/      describeError.ts: turns anything thrown by the AT Protocol/OAuth
+             SDKs (or our own code) into a {category, message} pair safe to
+             show a user — network vs. auth vs. atproto vs. application —
+             built on the SDKs' own error classes (XRPCError,
+             OAuthCallbackError, ...) rather than string-matching.
 network/     loggingFetch.ts: the fetch wrapper every layer above is routed
              through, for network transparency (see below).
 config/      All environment-derived settings, read from import.meta.env in
