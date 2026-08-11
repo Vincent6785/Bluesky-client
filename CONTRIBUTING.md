@@ -12,7 +12,7 @@ cp .env.example .env.local   # defaults are fine for local dev
 npm run dev
 ```
 
-Node.js 20+ is required. No account or API key is needed to develop the
+Node.js 22+ is required (`@atproto/api` ≥ 0.20 needs it). No account or API key is needed to develop the
 app itself (only to sign in and use it) — see [README.md](./README.md) for
 what network access is actually needed.
 

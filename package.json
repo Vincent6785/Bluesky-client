@@ -5,6 +5,9 @@
   "type": "module",
   "description": "Independent, privacy-first Bluesky client built on AT Protocol.",
   "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -16,17 +19,17 @@
     "test:e2e": "vitest run src/ui/App.e2e.test.tsx"
   },
   "dependencies": {
-    "@atproto/api": "^0.15.0",
+    "@atproto/api": "^0.20.39",
     "@atproto/oauth-client-browser": "^0.3.0",
-    "@atproto/xrpc": "^0.7.7",
+    "@atproto/xrpc": "^0.8.10",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
+    "@eslint/js": "^9.20.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
-    "@eslint/js": "^9.20.0",
     "@types/node": "^22.13.4",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",

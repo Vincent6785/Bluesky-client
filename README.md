@@ -22,7 +22,7 @@ follow/unfollow, like/unlike, repost/undo-repost, notifications, search
 
 ## Requirements
 
-- Node.js 20+
+- Node.js 22+ (required by `@atproto/api` ≥ 0.20)
 - A Bluesky (or other AT Protocol) account to sign in with
 
 ## Getting started
