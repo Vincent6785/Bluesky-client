@@ -3,6 +3,7 @@ import { searchUsers, searchPosts } from "@/services/searchService";
 import { useAsync } from "@/ui/hooks/useAsync";
 import { PostCard } from "@/ui/components/PostCard";
 import { useNavigationStore } from "@/store/navigationStore";
+import { onLinkActivateKey } from "@/ui/a11y";
 
 export function SearchScreen() {
   const push = useNavigationStore((s) => s.push);
@@ -24,6 +25,7 @@ export function SearchScreen() {
       <div className="search-input-row">
         <input
           type="search"
+          aria-label="Search Bluesky"
           placeholder="Search Bluesky"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -46,7 +48,14 @@ export function SearchScreen() {
       {tab === "users" &&
         usersState.status === "success" &&
         usersState.data.actors.map((actor) => (
-          <div key={actor.did} className="actor-row" onClick={() => push({ name: "profile", actor: actor.did })}>
+          <div
+            key={actor.did}
+            className="actor-row"
+            role="link"
+            tabIndex={0}
+            onClick={() => push({ name: "profile", actor: actor.did })}
+            onKeyDown={onLinkActivateKey(() => push({ name: "profile", actor: actor.did }))}
+          >
             <img className="avatar" src={actor.avatar} alt="" />
             <div className="actor-meta">
               <div className="display-name">{actor.displayName || actor.handle}</div>

@@ -4,6 +4,7 @@ import type { AppNotification } from "@/models/notification";
 import { useAsync } from "@/ui/hooks/useAsync";
 import { useNavigationStore } from "@/store/navigationStore";
 import { describeError } from "@/errors/describeError";
+import { onLinkActivateKey } from "@/ui/a11y";
 
 const REASON_LABEL: Record<string, string> = {
   like: "liked your post",
@@ -37,22 +38,28 @@ export function NotificationsScreen() {
   return (
     <div>
       {data.notifications.length === 0 && <p className="centered-message">No notifications yet.</p>}
-      {data.notifications.map((n) => (
-        <div
-          key={n.uri}
-          className="notification-item"
-          data-unread={!n.isRead}
-          onClick={() => {
-            if (n.reason === "follow") push({ name: "profile", actor: n.author.did });
-            else push({ name: "thread", uri: n.reasonSubject ?? n.uri });
-          }}
-        >
-          <img className="avatar" src={n.author.avatar} alt="" />
-          <div>
-            <strong>{n.author.displayName || n.author.handle}</strong> {describe(n)}
+      {data.notifications.map((n) => {
+        const activate = () => {
+          if (n.reason === "follow") push({ name: "profile", actor: n.author.did });
+          else push({ name: "thread", uri: n.reasonSubject ?? n.uri });
+        };
+        return (
+          <div
+            key={n.uri}
+            className="notification-item"
+            data-unread={!n.isRead}
+            role="link"
+            tabIndex={0}
+            onClick={activate}
+            onKeyDown={onLinkActivateKey(activate)}
+          >
+            <img className="avatar" src={n.author.avatar} alt="" />
+            <div>
+              <strong>{n.author.displayName || n.author.handle}</strong> {describe(n)}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

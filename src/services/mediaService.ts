@@ -1,7 +1,10 @@
 import type { BlobRef } from "@atproto/api";
 import { getAgent } from "@/api/agentService";
 
-export const MAX_IMAGE_BYTES = 1_000_000; // Bluesky PDS-enforced limit for app.bsky.embed.images blobs.
+// app.bsky.embed.images#image's `image` blob field: "May be up to 2 MB,
+// formerly limited to 1 MB" — per the lexicon shipped in @atproto/api
+// (client/lexicons.js). Keep this in sync if that lexicon changes.
+export const MAX_IMAGE_BYTES = 2_000_000;
 
 export type UploadedImage = {
   blob: BlobRef;

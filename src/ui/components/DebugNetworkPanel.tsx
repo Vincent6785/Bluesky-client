@@ -24,7 +24,7 @@ export function DebugNetworkPanel() {
 
   return (
     <div style={{ position: "fixed", bottom: 0, right: 0, zIndex: 100, fontFamily: "monospace", fontSize: 12 }}>
-      <button type="button" className="icon-button" onClick={() => setOpen((o) => !o)}>
+      <button type="button" className="icon-button" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
         network ({entries.length})
       </button>
       {open && (

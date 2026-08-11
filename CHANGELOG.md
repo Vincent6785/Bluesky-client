@@ -7,6 +7,29 @@ project doesn't yet follow Semantic Versioning tags (no release has been cut
 
 ## [Unreleased]
 
+### Fixed (deep audit pass)
+
+- No `<img>`/`<div>` click targets (post cards, notifications, search
+  results, thread ancestors) were reachable or activatable by keyboard —
+  none had `role`, `tabIndex`, or an Enter handler. Added all three, and
+  added `aria-label`s to icon-only buttons and placeholder-only inputs that
+  had no accessible name.
+- No React error boundary existed anywhere: an unexpected render error in
+  any single screen would blank the entire app. Added `ErrorBoundary`
+  (`src/ui/components/ErrorBoundary.tsx`), mounted at the app root and
+  around the per-screen router (keyed by view, so navigating away from a
+  crashed screen recovers automatically).
+- `mediaService.MAX_IMAGE_BYTES` was still 1 MB; `@atproto/api`'s bundled
+  lexicon (`app.bsky.embed.images#image`) has allowed up to 2 MB since
+  v0.19.7 — the client was rejecting valid uploads the PDS would accept.
+- Added semantic landmarks (`<header>`, `<main>`, labeled `<nav>`) and a
+  dynamic `document.title` per screen, neither of which existed before.
+- A squash-merge of an earlier PR caused a "sync dev with main" merge to
+  silently discard a `dev`-only commit (a `CONTRIBUTING.md` correction).
+  Re-applied the lost content and disabled squash/rebase merge on the
+  repository (merge commit only) so `dev` and `main` histories can't
+  diverge like that again.
+
 ### Added
 
 - Initial MVP: OAuth sign-in, session restore/logout, timeline, threads,

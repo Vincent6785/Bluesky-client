@@ -61,6 +61,7 @@ export function Composer({
   return (
     <div className="composer">
       <textarea
+        aria-label={replyTo ? "Post your reply" : "What's happening?"}
         placeholder={replyTo ? "Post your reply" : "What's happening?"}
         value={text}
         onChange={(e) => setText(e.target.value)}
@@ -71,6 +72,7 @@ export function Composer({
           {images.map((img, i) => (
             <div key={i}>
               <input
+                aria-label={`Alt text for image ${i + 1}`}
                 placeholder="Alt text"
                 value={img.alt}
                 onChange={(e) =>
@@ -98,6 +100,7 @@ export function Composer({
           <button
             type="button"
             className="icon-button"
+            aria-label="Add image"
             disabled={uploading || images.length >= MAX_IMAGES}
             onClick={() => fileInputRef.current?.click()}
           >
