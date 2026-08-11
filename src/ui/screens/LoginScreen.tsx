@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useAuthStore } from "@/store/authStore";
+import { describeError } from "@/errors/describeError";
 
 export function LoginScreen() {
   const signIn = useAuthStore((s) => s.signIn);
@@ -18,7 +19,7 @@ export function LoginScreen() {
       await signIn(handle.trim());
     } catch (err) {
       setSubmitting(false);
-      setError(err instanceof Error ? err.message : "Sign-in failed");
+      setError(describeError(err).message);
     }
   }
 

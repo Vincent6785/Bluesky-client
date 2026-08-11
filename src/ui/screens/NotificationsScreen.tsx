@@ -3,6 +3,7 @@ import { listNotifications, markAllSeen } from "@/services/notificationsService"
 import type { AppNotification } from "@/models/notification";
 import { useAsync } from "@/ui/hooks/useAsync";
 import { useNavigationStore } from "@/store/navigationStore";
+import { describeError } from "@/errors/describeError";
 
 const REASON_LABEL: Record<string, string> = {
   like: "liked your post",
@@ -22,12 +23,15 @@ export function NotificationsScreen() {
   const { status, data, error } = useAsync(() => listNotifications(), []);
 
   useEffect(() => {
-    void markAllSeen();
+    // Best-effort: failing to mark notifications as seen isn't worth
+    // interrupting the user over. Failures are still visible in the network
+    // debug log (src/network/loggingFetch.ts) if something's actually wrong.
+    markAllSeen().catch(() => {});
   }, []);
 
   if (status === "loading") return <p className="centered-message">Loading notifications…</p>;
   if (status === "error") {
-    return <p className="centered-message error-text">{error instanceof Error ? error.message : "Failed to load notifications"}</p>;
+    return <p className="centered-message error-text">{describeError(error).message}</p>;
   }
 
   return (

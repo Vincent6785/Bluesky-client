@@ -4,6 +4,7 @@ import { getAuthorFeed } from "@/services/timelineService";
 import { useAsync } from "@/ui/hooks/useAsync";
 import { PostCard } from "@/ui/components/PostCard";
 import { useAuthStore } from "@/store/authStore";
+import { describeError } from "@/errors/describeError";
 
 export function ProfileScreen({ actor }: { actor: string }) {
   const myDid = useAuthStore((s) => (s.auth.status === "signed-in" ? s.auth.did : undefined));
@@ -11,6 +12,7 @@ export function ProfileScreen({ actor }: { actor: string }) {
   const feedState = useAsync(() => getAuthorFeed(actor), [actor]);
   const [followUri, setFollowUri] = useState<string | undefined>();
   const [busy, setBusy] = useState(false);
+  const [followError, setFollowError] = useState<string | undefined>();
 
   const profile = profileState.status === "success" ? profileState.data : undefined;
   const currentFollowUri = followUri !== undefined ? followUri : profile?.viewer?.following;
@@ -18,6 +20,7 @@ export function ProfileScreen({ actor }: { actor: string }) {
   async function toggleFollow() {
     if (!profile || busy) return;
     setBusy(true);
+    setFollowError(undefined);
     try {
       if (currentFollowUri) {
         await unfollow(currentFollowUri);
@@ -26,6 +29,8 @@ export function ProfileScreen({ actor }: { actor: string }) {
         const ref = await follow(profile.did);
         setFollowUri(ref.uri);
       }
+    } catch (error) {
+      setFollowError(describeError(error).message);
     } finally {
       setBusy(false);
     }
@@ -33,7 +38,7 @@ export function ProfileScreen({ actor }: { actor: string }) {
 
   if (profileState.status === "loading") return <p className="centered-message">Loading profile…</p>;
   if (profileState.status === "error" || !profile) {
-    return <p className="centered-message error-text">Failed to load profile</p>;
+    return <p className="centered-message error-text">{describeError(profileState.error).message}</p>;
   }
 
   const isSelf = profile.did === myDid;
@@ -49,6 +54,7 @@ export function ProfileScreen({ actor }: { actor: string }) {
             </button>
           )}
         </div>
+        {followError && <p className="error-text">{followError}</p>}
         <div className="display-name">{profile.displayName || profile.handle}</div>
         <div className="handle">@{profile.handle}</div>
         {profile.description && <p className="profile-bio">{profile.description}</p>}

@@ -3,6 +3,7 @@ import { RichText } from "@atproto/api";
 import { createPost } from "@/services/postService";
 import { uploadImage, type UploadedImage } from "@/services/mediaService";
 import type { StrongRef } from "@/models/post";
+import { describeError } from "@/errors/describeError";
 
 const MAX_GRAPHEMES = 300;
 const MAX_IMAGES = 4;
@@ -35,7 +36,7 @@ export function Composer({
       const uploaded = await Promise.all(files.map((file) => uploadImage(file, "")));
       setImages((prev) => [...prev, ...uploaded]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Image upload failed");
+      setError(describeError(err).message);
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -51,7 +52,7 @@ export function Composer({
       setImages([]);
       onPosted?.();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to post");
+      setError(describeError(err).message);
     } finally {
       setPosting(false);
     }

@@ -5,6 +5,7 @@ import { readPostRecord } from "@/models/post";
 import { like, unlike, repost, unrepost, deletePost } from "@/services/postService";
 import { useAuthStore } from "@/store/authStore";
 import { useNavigationStore } from "@/store/navigationStore";
+import { describeError } from "@/errors/describeError";
 import { RichTextView } from "./RichTextView";
 
 function formatTimestamp(iso: string): string {
@@ -26,6 +27,7 @@ export function PostCard({ post, onDeleted }: { post: Post; onDeleted?: () => vo
   const record = readPostRecord(post);
   const [viewer, setViewer] = useState(post.viewer);
   const [busy, setBusy] = useState(false);
+  const [actionError, setActionError] = useState<string | undefined>();
 
   if (!record) return null;
 
@@ -34,6 +36,7 @@ export function PostCard({ post, onDeleted }: { post: Post; onDeleted?: () => vo
   async function toggleLike() {
     if (busy) return;
     setBusy(true);
+    setActionError(undefined);
     try {
       if (viewer?.like) {
         await unlike(viewer.like);
@@ -45,6 +48,8 @@ export function PostCard({ post, onDeleted }: { post: Post; onDeleted?: () => vo
         const ref = await like({ uri: post.uri, cid: post.cid });
         setViewer((v) => ({ ...v, like: ref.uri }));
       }
+    } catch (error) {
+      setActionError(describeError(error).message);
     } finally {
       setBusy(false);
     }
@@ -53,6 +58,7 @@ export function PostCard({ post, onDeleted }: { post: Post; onDeleted?: () => vo
   async function toggleRepost() {
     if (busy) return;
     setBusy(true);
+    setActionError(undefined);
     try {
       if (viewer?.repost) {
         await unrepost(viewer.repost);
@@ -64,6 +70,8 @@ export function PostCard({ post, onDeleted }: { post: Post; onDeleted?: () => vo
         const ref = await repost({ uri: post.uri, cid: post.cid });
         setViewer((v) => ({ ...v, repost: ref.uri }));
       }
+    } catch (error) {
+      setActionError(describeError(error).message);
     } finally {
       setBusy(false);
     }
@@ -72,9 +80,12 @@ export function PostCard({ post, onDeleted }: { post: Post; onDeleted?: () => vo
   async function onDelete() {
     if (busy || !window.confirm("Delete this post?")) return;
     setBusy(true);
+    setActionError(undefined);
     try {
       await deletePost(post.uri);
       onDeleted?.();
+    } catch (error) {
+      setActionError(describeError(error).message);
     } finally {
       setBusy(false);
     }
@@ -134,6 +145,7 @@ export function PostCard({ post, onDeleted }: { post: Post; onDeleted?: () => vo
             </button>
           )}
         </div>
+        {actionError && <p className="error-text">{actionError}</p>}
       </div>
     </article>
   );

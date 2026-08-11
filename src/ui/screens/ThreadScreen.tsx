@@ -4,6 +4,7 @@ import { Composer } from "@/ui/components/Composer";
 import { PostCard } from "@/ui/components/PostCard";
 import type { ThreadNode } from "@/models/post";
 import { useNavigationStore } from "@/store/navigationStore";
+import { describeError } from "@/errors/describeError";
 
 function isThreadPost(node: unknown): node is ThreadNode {
   return Boolean(node) && (node as { $type?: string }).$type === "app.bsky.feed.defs#threadViewPost";
@@ -25,7 +26,7 @@ export function ThreadScreen({ uri }: { uri: string }) {
 
   if (status === "loading") return <p className="centered-message">Loading thread…</p>;
   if (status === "error") {
-    return <p className="centered-message error-text">{error instanceof Error ? error.message : "Failed to load thread"}</p>;
+    return <p className="centered-message error-text">{describeError(error).message}</p>;
   }
 
   if (!isThreadPost(data)) {

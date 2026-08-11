@@ -4,15 +4,26 @@ dist-ssr
 coverage
 *.local
 *.tsbuildinfo
+.vite
 
 .env
 .env.local
+.env.*.local
+
+# Never commit private keys or certs.
+*.pem
+*.key
+*.p12
+*.pfx
 
 .vscode/*
 !.vscode/extensions.json
 .idea
+*.swp
+*.swo
 
 *.log
 npm-debug.log*
 
 .DS_Store
+Thumbs.db

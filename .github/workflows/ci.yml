@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# No secrets are used anywhere in this workflow — it only installs public
+# dependencies and runs local checks against the checked-out code.
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Fails the job on high/critical advisories in the dependency tree.
+      # Low/moderate advisories are reported but don't block — re-run with
+      # no --audit-level to see everything.
+      - name: npm audit (high/critical)
+        run: npm audit --audit-level=high
+
+  secret-scan:
+    name: Secret pattern scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Deliberately dependency-free (plain grep) so this needs no external
+      # action, API token, or network access beyond the checkout itself.
+      # Not a substitute for care at commit time — a shallow, fast backstop.
+      - name: Scan tracked files for obvious secret patterns
+        run: |
+          set -e
+          PATTERN='AKIA[0-9A-Z]{16}|BEGIN (RSA|EC|OPENSSH|PGP) PRIVATE KEY|client_secret["'"'"']?\s*[:=]|password["'"'"']?\s*[:=]\s*["'"'"'][^"'"'"']|api[_-]?key["'"'"']?\s*[:=]\s*["'"'"'][A-Za-z0-9_-]{16,}'
+          if git grep -nIiE "$PATTERN" -- . ':!*.md' ':!package-lock.json'; then
+            echo "Potential secret pattern found — see matches above." >&2
+            exit 1
+          fi
+          echo "No obvious secret patterns found."

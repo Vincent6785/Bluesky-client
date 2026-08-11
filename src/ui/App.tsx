@@ -74,6 +74,18 @@ function AppShell() {
   );
 }
 
+function AuthErrorScreen({ message }: { message: string }) {
+  const initialize = useAuthStore((s) => s.initialize);
+  return (
+    <div className="centered-message">
+      <p className="error-text">{message}</p>
+      <button type="button" className="primary-button" onClick={() => void initialize()}>
+        Try again
+      </button>
+    </div>
+  );
+}
+
 export function App() {
   const auth = useAuthStore((s) => s.auth);
   const initialize = useAuthStore((s) => s.initialize);
@@ -86,6 +98,7 @@ export function App() {
     <>
       {auth.status === "loading" && <p className="centered-message">Loading…</p>}
       {auth.status === "signed-out" && <LoginScreen />}
+      {auth.status === "error" && <AuthErrorScreen message={auth.message} />}
       {auth.status === "signed-in" && <AppShell />}
       <DebugNetworkPanel />
     </>
