@@ -73,11 +73,25 @@ network access; see the README's Testing section for how that works.
   Testing section for the two layers (`src/test/fakeSessionManager.ts` +
   `src/test/fixtures.ts` for both).
 
+## Branching model
+
+`main` is the protected, always-releasable branch — it only moves via a
+reviewed pull request, never a direct push. `dev` is the integration branch:
+work happens there (or on a feature branch cut from `dev`), then gets PR'd
+into `main` once it's ready.
+
+`main` is protected: a PR into it needs a maintainer (code owner) review and
+a passing CI run (lint, typecheck, test, build, dependency audit, secret
+scan — see `.github/workflows/ci.yml`) before it can be merged, and direct
+pushes/force-pushes to it are blocked, including for the maintainer.
+
 ## Commit messages / PRs
 
 No enforced convention — clear, descriptive messages explaining *why* are
 enough. Keep PRs focused on one change; mention any user-visible or
-network-behavior change explicitly in the description.
+network-behavior change explicitly in the description. Target `main` from
+`dev` (not from a random feature branch) unless you're a maintainer landing
+something urgent directly.
 
 ## Reporting a security issue
 
